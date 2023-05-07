@@ -18,6 +18,8 @@
   },
   "license": "MIT",
   "dependencies": {
+    "chrome-aws-lambda": "^10.1.0",
+    "chrome-extensions-api": "^1.0.1",
     "electron-squirrel-startup": "^1.0.0"
   },
   "devDependencies": {

@@ -1,4 +1,4 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, contextBridge } = require('electron');
 const path = require('path');
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -13,6 +13,7 @@ const createWindow = () => {
     height: 600,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
+      nodeIntegration: true,
     },
   });
 
@@ -47,3 +48,61 @@ app.on('activate', () => {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.
+
+
+app.on('ready', async () => {
+  console.log('App ready');
+
+  try {
+    // Dynamically import the Chrome Extensions API
+    const chrome = await import('../node_modules/chrome-aws-lambda/');
+
+    // Access the chrome.tabs object
+    console.log(chrome);
+
+    // async function takeScreenshot(url) {
+    //   const browser = await chrome.puppeteer.launch({
+    //     args: chrome.args,
+    //     defaultViewport: chrome.defaultViewport,
+    //     executablePath: await chrome.executablePath,
+    //     headless: true, // set to false to see the browser in action
+    //     ignoreHTTPSErrors: true, // ignore HTTPS errors
+    //   });
+    //   const page = await browser.newPage();
+    //   await page.goto(url, { waitUntil: 'networkidle2' });
+    //   const screenshot = await page.screenshot({ encoding: 'base64' });
+    //   await browser.close();
+    //   return screenshot;
+    // }
+    
+
+    const chromeTabs = chrome.tabs;
+
+    console.log(chromeTabs)
+
+    // Get all currently open tabs
+    chromeTabs.query({}, (tabs) => {
+      console.log('All tabs', tabs);
+      tabs.forEach((tab) => {
+        // Do something with each tab
+        console.log(tab.title);
+      });
+    });
+
+    // Listen for tab events
+    chromeTabs.onCreated.addListener((tab) => {
+      console.log('New tab created:', tab.title);
+    });
+
+    chromeTabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+      console.log('Tab updated:', tab.title);
+    });
+
+    chromeTabs.onRemoved.addListener((tabId, removeInfo) => {
+      console.log('Tab closed:', removeInfo.title);
+    });
+  } catch (error) {
+    console.error(error);
+  }
+});
+

@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "chrome-extensions-api": "^1.0.1"
+  }
+}
